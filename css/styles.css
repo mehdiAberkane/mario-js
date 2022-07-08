@@ -1,0 +1,75 @@
+body{
+    background-color: 
+}
+#cadre{
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+#conteneur
+{
+    position: relative;
+    width: 100%;
+    margin: auto;
+    background-image: url('../img/fond.jpg');
+    background-size: 100% 340px;
+    background-repeat: no-repeat;
+    height: 340px;
+    border: 5px black solid;
+    padding-bottom: 83px;
+    overflow: hidden;
+}
+
+#mario
+{
+    width: 1200px;
+}
+
+#goomba
+{
+ width: 700px;
+}
+
+#goomba img {
+    width: 40px;
+    position: absolute;
+    bottom: 33px;
+    margin-left: 500px;
+}
+.carre
+{
+    background-image: url('../img/carre.png');
+    width: 30px;
+    height: 30px;
+    background-size: 30px 30px;
+    position: absolute;
+    bottom: 105px;
+    left: 300px;
+}
+
+.carre:nth-child(2)
+{
+    left: 450px;
+}
+
+.carre:nth-child(3)
+{
+    left:510px;
+}
+
+img
+{
+    width: 45px;
+    position: absolute;
+    bottom: 33px;
+}
+
+.marioinverse
+{
+    -moz-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+    filter: FlipH;
+    -ms-filter: "FlipH";
+}
