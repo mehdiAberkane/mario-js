@@ -2,6 +2,7 @@
 var VITESSE = 180;       // px par seconde quand une flèche est maintenue
 var ELAN_SAUT = 100;     // px par seconde pendant un saut diagonal sans flèche
 var DUREE_APPUI_MIN = 150; // ms de déplacement garanties pour un appui bref
+var VITESSE_GOOMBA = 40; // px par seconde
 var touches = {};        // touches actuellement enfoncées
 var appuiJusqua = {};    // instant jusqu'auquel un appui bref compte encore
 var x = 0;               // position horizontale de mario
@@ -9,7 +10,13 @@ var sens = 1;            // 1 = droite, -1 = gauche
 var saut = false;
 var cogne = false;       // mario a déjà cassé une case pendant ce saut
 var elan = 0;
+var mort = false;
+var basPrecedent = null; // bas de mario à l'image précédente, pour savoir s'il retombe
+var goombaX = 0;
+var goombaSens = 1;
+var goombaMort = false;
 var POINTS_CASE = 100;
+var POINTS_GOOMBA = 100;
 var score = 0;
 
 //////////////////////////////////////////////// SCORE /////////////////////////////////////
@@ -18,19 +25,36 @@ var ajouterScore = function(points){
     $("#score").text("SCORE " + ("000000" + score).slice(-6));
 };
 
+// ajoute les points et affiche "+points" qui s'envole à cet endroit du conteneur
+var gagner = function(points, left, top){
+    var texte = $('<div class="points">+' + points + '</div>').css({left: left, top: top});
+    $("#conteneur").append(texte);
+    setTimeout(function(){ texte.remove(); }, 900);
+    ajouterScore(points);
+};
+
+//////////////////////////////////////////////// COLLISIONS /////////////////////////////////////
+// rectangle d'un élément, rétréci sur les côtés pour ignorer les bords transparents
+var boite = function(element, marge){
+    var r = element.getBoundingClientRect();
+    return {left: r.left + marge, right: r.right - marge, top: r.top, bottom: r.bottom};
+};
+
+var chevauche = function(a, b){
+    return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+};
+
 //////////////////////////////////////////////// CASES /////////////////////////////////////
 // renvoie la case que la tête de mario touche (la plus proche de son centre)
 var caseTouchee = function(){
-    var mario = $("#mario img")[0].getBoundingClientRect();
-    var centre = mario.left + mario.width / 2;
+    var mario = boite($("#mario img")[0], 0);
+    var centre = (mario.left + mario.right) / 2;
     var touchee = null;
     var distance = Infinity;
     $(".carre:not(.cassee)").each(function(){
-        var c = this.getBoundingClientRect();
-        var chevauche = mario.left < c.right && mario.right > c.left
-                     && mario.top < c.bottom && mario.bottom > c.top;
-        var d = Math.abs(centre - (c.left + c.width / 2));
-        if (chevauche && d < distance) {
+        var c = boite(this, 0);
+        var d = Math.abs(centre - (c.left + c.right) / 2);
+        if (chevauche(mario, c) && d < distance) {
             touchee = this;
             distance = d;
         }
@@ -59,12 +83,7 @@ var exploser = function(bloc){
         setTimeout(function(){ debris.remove(); }, 800);
     });
 
-    var points = $('<div class="points">+' + POINTS_CASE + '</div>')
-        .css({left: pos.left - 5, top: pos.top - 25});
-    conteneur.append(points);
-    setTimeout(function(){ points.remove(); }, 900);
-
-    ajouterScore(POINTS_CASE);
+    gagner(POINTS_CASE, pos.left - 5, pos.top - 25);
 };
 
 //////////////////////////////////////////////// SPRITE /////////////////////////////////////
@@ -111,6 +130,64 @@ var sautDiagonal = function(){
     sauter(102, 500, sens * ELAN_SAUT);
 };
 
+//////////////////////////////////////////////// GOOMBA /////////////////////////////////////
+// le goomba fait des allers-retours entre -120px et 120px
+var deplacerGoomba = function(dt){
+    if (goombaMort) return;
+    goombaX += goombaSens * VITESSE_GOOMBA * dt;
+    if (goombaX > 120)  { goombaX = 120;  goombaSens = -1; }
+    if (goombaX < -120) { goombaX = -120; goombaSens = 1; }
+    $("#goomba img").css('left', goombaX + 'px');
+};
+
+// mario lui retombe sur la tête : il est écrasé, disparaît, et mario rebondit
+var ecraserGoomba = function(){
+    var goomba = $("#goomba img");
+    var conteneur = $("#conteneur").offset();
+    var pos = goomba.offset();
+    goombaMort = true;
+    goomba.addClass("ecrase");
+    setTimeout(function(){ goomba.hide(); }, 400);
+    gagner(POINTS_GOOMBA, pos.left - conteneur.left, pos.top - conteneur.top - 25);
+
+    $("#mario img").stop(true)
+        .animate({bottom:"+=40px"}, 200)
+        .animate({bottom:"33px"}, 300, finSaut);
+};
+
+// renvoie true si le contact avec le goomba a tué mario
+var contactGoomba = function(){
+    var mario = boite($("#mario img")[0], 8);
+    var bas = basPrecedent === null ? mario.bottom : basPrecedent;
+    basPrecedent = mario.bottom;
+    if (goombaMort) return false;
+
+    var goomba = boite($("#goomba img")[0], 4);
+    if (!chevauche(mario, goomba)) return false;
+
+    var retombe = saut && mario.bottom > bas;
+    var piedsAuDessus = bas <= goomba.top + 10;
+    if (retombe && piedsAuDessus) {
+        ecraserGoomba();
+        return false;
+    }
+    mourir();
+    return true;
+};
+
+//////////////////////////////////////////////// GAME OVER /////////////////////////////////////
+var mourir = function(){
+    mort = true;
+    touches = {};
+    sprite('img/mario_jump.png');
+    $("#mario img").stop(true)
+        .animate({bottom:"+=70px"}, 300)
+        .animate({bottom:"-80px"}, 700, function(){
+            $("#game-over").addClass("visible");
+            $("#restart").focus();
+        });
+};
+
 //////////////////////////////////////////////// BOUCLE /////////////////////////////////////
 var dernierTemps = null;
 
@@ -134,6 +211,8 @@ var boucle = function(temps){
     x = Math.max(0, Math.min(max, x + vitesse * dt));
     img.css('left', x + 'px');
 
+    deplacerGoomba(dt);
+
     if (saut) {
         sprite('img/mario_jump.png');
         if (!cogne) cognerCase();
@@ -143,15 +222,10 @@ var boucle = function(temps){
         sprite('img/marios.png');
     }
 
+    // la partie s'arrête : on ne relance plus la boucle
+    if (contactGoomba()) return;
+
     requestAnimationFrame(boucle);
-};
-
-//////////////////////////////////////////////// GOOMBA /////////////////////////////////////
-
-var goomba = function(){
-    $("#goomba img").animate({left:"120px"},3000)
-        .delay(200)
-        .animate({left:"-120px"},3000, goomba);
 };
 
 //////////////////////////////////////////////// SON /////////////////////////////////////
@@ -161,11 +235,11 @@ var jump_sound = new Audio('sons/saut.wav');
 
 //////////////////////////////////////////////// CONTROLLER /////////////////////////////////////
 window.onload=function(){
-    goomba();
     requestAnimationFrame(boucle);
 };
 
 $(document).keydown(function(event){
+    if (mort) return;
     switch(event.which){
         case 37:
         case 39:
@@ -194,4 +268,8 @@ $(document).keyup(function(event){
 
 $(window).blur(function(){
     touches = {};
+});
+
+$(document).on('click', '#restart', function(){
+    location.reload();
 });

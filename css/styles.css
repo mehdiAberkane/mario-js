@@ -110,6 +110,47 @@ body{
     to { transform: translateY(-40px); opacity: 0; }
 }
 
+#goomba img.ecrase
+{
+    transform: scaleY(0.3);
+    transform-origin: bottom;
+    transition: transform 150ms;
+}
+
+#game-over
+{
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+#game-over.visible
+{
+    display: flex;
+    animation: fondu 400ms;
+}
+
+#game-over h2
+{
+    margin: 0 0 25px;
+    color: #fff;
+    font: bold 72px monospace;
+    text-shadow: 4px 4px 0 #c00;
+}
+
+@keyframes fondu
+{
+    from { opacity: 0; }
+}
+
 img
 {
     width: 45px;
