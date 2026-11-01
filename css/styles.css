@@ -14,7 +14,9 @@ body{
     width: 100%;
     margin: auto;
     background-image: url('../img/fond.jpg');
-    background-size: 100% 340px;
+    /* décor à l'échelle, sans déformation : on n'en montre que la fin, où se trouve le château */
+    background-size: auto 340px;
+    background-position: right top;
     background-repeat: no-repeat;
     height: 340px;
     border: 5px black solid;

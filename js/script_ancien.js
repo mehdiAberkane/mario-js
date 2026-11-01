@@ -3,7 +3,7 @@ var VITESSE = 180;       // px par seconde quand une flèche est maintenue
 var ELAN_SAUT = 100;     // px par seconde pendant un saut diagonal sans flèche
 var DUREE_APPUI_MIN = 150; // ms de déplacement garanties pour un appui bref
 var VITESSE_GOOMBA = 40; // px par seconde
-var POSITION_CHATEAU = 0.925; // porte du château, en fraction de la largeur du décor
+var DISTANCE_CHATEAU = 241; // px entre la porte du château et le bord droit du décor
 var touches = {};        // touches actuellement enfoncées
 var appuiJusqua = {};    // instant jusqu'auquel un appui bref compte encore
 var x = 0;               // position horizontale de mario
@@ -242,7 +242,7 @@ var boucle = function(temps){
     }
 
     // la partie s'arrête : on ne relance plus la boucle
-    if (x + img.width() / 2 >= $("#conteneur").innerWidth() * POSITION_CHATEAU) {
+    if (x + img.width() / 2 >= $("#conteneur").innerWidth() - DISTANCE_CHATEAU) {
         victoire();
         return;
     }

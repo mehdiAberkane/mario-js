@@ -30,7 +30,7 @@ Les constantes en haut de `js/script_ancien.js` permettent d'ajuster le jeu :
 | `VITESSE` | Vitesse de Mario (px/s) |
 | `VITESSE_GOOMBA` | Vitesse du goomba (px/s) |
 | `DUREE_APPUI_MIN` | Durée de déplacement garantie pour un appui bref (ms) |
-| `POSITION_CHATEAU` | Position de la porte du château, en fraction de la largeur du décor |
+| `DISTANCE_CHATEAU` | Distance entre la porte du château et le bord droit du décor (px) |
 | `POINTS_CASE`, `POINTS_GOOMBA` | Points rapportés |
 
 ## Structure
