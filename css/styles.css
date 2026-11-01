@@ -1,10 +1,12 @@
 body{
-    background-color: 
 }
 #cadre{
     position: fixed;
-    bottom: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 100%;
+    max-width: 1000px;
 }
 #conteneur
 {
@@ -47,14 +49,65 @@ body{
     left: 300px;
 }
 
-.carre:nth-child(2)
+.carre:nth-child(6)
 {
     left: 450px;
 }
 
-.carre:nth-child(3)
+.carre:nth-child(7)
 {
     left:510px;
+}
+
+.carre:nth-child(8)
+{
+    left:570px;
+}
+
+.carre.cassee
+{
+    visibility: hidden;
+}
+
+.debris
+{
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background-image: url('../img/carre.png');
+    background-size: 30px 30px;
+    animation: explosion 700ms ease-in forwards;
+}
+
+@keyframes explosion
+{
+    0%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+    30%  { transform: translate(calc(var(--dx) * 0.4), -30px) rotate(calc(var(--r) * 0.4)); opacity: 1; }
+    100% { transform: translate(var(--dx), 120px) rotate(var(--r)); opacity: 0; }
+}
+
+#score
+{
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: #fff;
+    font: bold 20px monospace;
+    text-shadow: 2px 2px 0 #000;
+}
+
+.points
+{
+    position: absolute;
+    color: #fff;
+    font: bold 16px monospace;
+    text-shadow: 1px 1px 0 #000;
+    animation: points-monte 800ms ease-out forwards;
+}
+
+@keyframes points-monte
+{
+    to { transform: translateY(-40px); opacity: 0; }
 }
 
 img
