@@ -38,9 +38,15 @@
            <!-- SCORE (après les cases : le CSS les place avec nth-child) -->
            <div id="score">SCORE 000000</div>
            <!-- GAME OVER -->
-           <div id="game-over">
+           <div id="game-over" class="ecran-fin">
                <h2>GAME OVER</h2>
-               <button id="restart" class="btn btn-danger btn-lg">Restart</button>
+               <button class="restart btn btn-danger btn-lg">Restart</button>
+           </div>
+           <!-- VICTOIRE -->
+           <div id="victoire" class="ecran-fin">
+               <h2>NIVEAU TERMINÉ !</h2>
+               <p class="score-final"></p>
+               <button class="restart btn btn-success btn-lg">Rejouer</button>
            </div>
        </div>
    </div>

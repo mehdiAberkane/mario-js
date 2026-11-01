@@ -3,6 +3,7 @@ var VITESSE = 180;       // px par seconde quand une flèche est maintenue
 var ELAN_SAUT = 100;     // px par seconde pendant un saut diagonal sans flèche
 var DUREE_APPUI_MIN = 150; // ms de déplacement garanties pour un appui bref
 var VITESSE_GOOMBA = 40; // px par seconde
+var POSITION_CHATEAU = 0.925; // porte du château, en fraction de la largeur du décor
 var touches = {};        // touches actuellement enfoncées
 var appuiJusqua = {};    // instant jusqu'auquel un appui bref compte encore
 var x = 0;               // position horizontale de mario
@@ -11,6 +12,7 @@ var saut = false;
 var cogne = false;       // mario a déjà cassé une case pendant ce saut
 var elan = 0;
 var mort = false;
+var gagne = false;
 var basPrecedent = null; // bas de mario à l'image précédente, pour savoir s'il retombe
 var goombaX = 0;
 var goombaSens = 1;
@@ -183,9 +185,26 @@ var mourir = function(){
     $("#mario img").stop(true)
         .animate({bottom:"+=70px"}, 300)
         .animate({bottom:"-80px"}, 700, function(){
-            $("#game-over").addClass("visible");
-            $("#restart").focus();
+            afficherFin("#game-over");
         });
+};
+
+// mario atteint la porte du château : il y entre et la partie est gagnée
+var victoire = function(){
+    gagne = true;
+    touches = {};
+    sprite('img/marios.png');
+    $("#mario img").stop(true)
+        .animate({bottom:"33px"}, 200)
+        .fadeOut(500, function(){
+            $("#victoire .score-final").text($("#score").text());
+            afficherFin("#victoire");
+        });
+};
+
+var afficherFin = function(ecran){
+    $(ecran).addClass("visible");
+    $(ecran).find(".restart").focus();
 };
 
 //////////////////////////////////////////////// BOUCLE /////////////////////////////////////
@@ -223,6 +242,10 @@ var boucle = function(temps){
     }
 
     // la partie s'arrête : on ne relance plus la boucle
+    if (x + img.width() / 2 >= $("#conteneur").innerWidth() * POSITION_CHATEAU) {
+        victoire();
+        return;
+    }
     if (contactGoomba()) return;
 
     requestAnimationFrame(boucle);
@@ -239,7 +262,7 @@ window.onload=function(){
 };
 
 $(document).keydown(function(event){
-    if (mort) return;
+    if (mort || gagne) return;
     switch(event.which){
         case 37:
         case 39:
@@ -270,6 +293,6 @@ $(window).blur(function(){
     touches = {};
 });
 
-$(document).on('click', '#restart', function(){
+$(document).on('click', '.restart', function(){
     location.reload();
 });
